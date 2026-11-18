@@ -32,6 +32,8 @@ export async function runSeed({ reset = false } = {}) {
   await Event.insertMany(events().map((e) => ({ ...e, building: idByName.get(e.building) })));
   await Announcement.insertMany(announcements());
 
+  // The demo student is only created when DEMO_USER_EMAIL and DEMO_USER_PASSWORD are set in .env
+  if (!demoUser.email || !demoUser.password) return true;
   let user = await User.findOne({ email: demoUser.email });
   if (!user) user = await User.create(demoUser);
 

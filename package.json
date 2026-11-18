@@ -4,10 +4,12 @@
   "private": true,
   "description": "CampusBuddy - AI campus assistant (React + Tailwind + OpenStreetMap + Express + MongoDB + OpenAI)",
   "scripts": {
+    "dev": "node init && node dev.js",
     "install:all": "npm install --prefix server && npm install --prefix client",
     "server": "npm run dev --prefix server",
     "client": "npm run dev --prefix client",
     "seed": "npm run seed --prefix server",
-    "build": "npm run build --prefix client"
-  }
+    "build": "node init && npm run build --prefix client"
+  },
+  "type": "module"
 }

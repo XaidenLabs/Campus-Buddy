@@ -1,3 +1,4 @@
+import { config } from '../config.js';
 // Sample data for Nasarawa State University, Keffi.
 // Coordinates are approximate (around 8.847 N, 7.878 E) - adjust them in MongoDB or here to match the real campus.
 // Phone numbers and emails are placeholders.
@@ -289,10 +290,11 @@ export const announcements = () => [
   },
 ];
 
+// Demo student login comes from DEMO_USER_EMAIL / DEMO_USER_PASSWORD in server/.env
 export const demoUser = {
   name: 'Johnson Okafor',
-  email: 'johnson@nsuk.edu.ng',
-  password: 'campus123',
+  email: config.demoUser.email,
+  password: config.demoUser.password,
   department: 'Computer Science',
   level: '400',
   role: 'student',

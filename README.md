@@ -28,17 +28,43 @@ You need Node 20+ and MongoDB (local, or a free MongoDB Atlas connection string)
 # 1. install everything
 npm run install:all
 
-# 2. configure the server
-cp server/.env.example server/.env
-#    then edit server/.env: set MONGODB_URI, JWT_SECRET and (optionally) OPENAI_API_KEY
+# 2. configure (all secrets live in .env files, never in the code)
+cp server/.env.example server/.env   # MONGODB_URI, JWT_SECRET, ADMIN_*, DEMO_USER_*, OPENAI_API_KEY ...
+cp client/.env.example client/.env   # API_PROXY_TARGET, optional VITE_DEMO_*, maps keys
 
-# 3. run (two terminals)
-npm run server      # API on http://localhost:5000
-npm run client      # app on http://localhost:5173
+# 3. run both at once
+npm run dev
+#    API  -> http://localhost:5000   (check http://localhost:5000/api/health)
+#    App  -> http://localhost:5173
 ```
 
-On first start the API fills an empty database with sample NSUK data (`AUTO_SEED=true`).
-Demo login: **johnson@nsuk.edu.ng / campus123**. To reset the sample data at any time: `npm run seed`.
+`npm run server` and `npm run client` still work if you prefer two terminals.
+
+### How the frontend and backend are linked
+
+The React app never hardcodes the API address. `client/src/lib/api.js` calls relative URLs like `/api/auth/login`.
+In development the Vite dev server (port 5173) forwards every `/api/...` request to `API_PROXY_TARGET`
+(the Express server, default `http://localhost:5000`), set in `client/.env`. The server allows that origin through
+`CLIENT_ORIGIN` in `server/.env`. In production either serve both from one domain, or set `VITE_API_URL` to the API's full URL.
+
+`server/.env` holds every secret (database, JWT, OpenAI, SMTP, admin and demo passwords). The server refuses to start
+if `MONGODB_URI` or `JWT_SECRET` is missing. Anything in `client/.env` that starts with `VITE_` ends up in the browser,
+so only public values go there.
+
+## Deploying to Vercel
+
+Frontend and API deploy together as one Vercel project (see `vercel.json`):
+the React build is served as static files and every `/api/*` request goes to `api/index.js`,
+which runs the same Express app as a serverless function. Because both share one domain, the
+frontend keeps calling `/api` and no `VITE_API_URL` is needed.
+
+1. Import the GitHub repo in Vercel (leave Root Directory as the repo root; settings come from `vercel.json`).
+2. In Project Settings > Environment Variables add the values from `server/.env`
+   (`MONGODB_URI`, `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DEMO_USER_EMAIL`, `DEMO_USER_PASSWORD`,
+   `OPENAI_API_KEY`...), plus `CLIENT_ORIGIN` and `CLIENT_URL` set to your Vercel URL, `DNS_SERVERS` empty,
+   and optionally `VITE_DEMO_EMAIL` / `VITE_DEMO_PASSWORD`.
+3. In MongoDB Atlas > Network Access allow `0.0.0.0/0` (Vercel has no fixed IP).
+4. Check `https://<your-app>.vercel.app/api/health` shows `"db": true`.
 
 ### OpenAI
 

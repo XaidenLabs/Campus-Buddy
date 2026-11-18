@@ -6,7 +6,12 @@ import { ErrorNote } from '../components/Spinner.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const LEVELS = ['100', '200', '300', '400', '500', '600'];
-const DEMO = { email: 'johnson@nsuk.edu.ng', password: 'campus123' };
+// Demo account comes from client/.env (VITE_DEMO_EMAIL / VITE_DEMO_PASSWORD). The button is hidden when they are empty.
+const DEMO = {
+  email: (import.meta.env.VITE_DEMO_EMAIL || '').trim(),
+  password: import.meta.env.VITE_DEMO_PASSWORD || '',
+};
+const HAS_DEMO = Boolean(DEMO.email && DEMO.password);
 
 export default function AuthPage({ mode }) {
   const isRegister = mode === 'register';
@@ -118,7 +123,7 @@ export default function AuthPage({ mode }) {
           {isRegister ? 'Create account' : 'Sign in'}
         </button>
 
-        {!isRegister && (
+        {!isRegister && HAS_DEMO && (
           <button
             type="button"
             className="btn-ghost w-full"
